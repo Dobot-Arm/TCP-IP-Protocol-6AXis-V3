@@ -6,8 +6,10 @@ English version of the README -> please [click here](./README-EN.md)
 
 
 # 0.Changelog
-
-- V3.2-2023/10/08：增加SetUser,SetTool,CalcUser,CalcTool指令。
+- V3.6-2023/10/19: 新增RelPointUser、RelPointTool、SetHomeCalibration、SetGlobalVar、GetGlobalVar、SetAxisLimit、GetAxisLimit两条指令。
+- V3.5-2023/09/26: 新增SetUser、SetTool、CalcUser、CalcTool这四条指令。
+- V3.4-2023/08/03：修改modbus相关指令参数说明。
+- V3.3-2023/07/19: 增加托盘两条指令PalletCreate GetPalletPose。
 - V3.2-2023/06/16：针对开会评审意见修改文档格式以及排版。
 - V3.1-2023/06/15：针对设置指令以及运动指令添加命令注释说明。
 - V3.0-2023/06/14：基于原有TCP/IP文档进行梳理重构，输出初版。
@@ -133,6 +135,19 @@ English version of the README -> please [click here](./README-EN.md)
 | LoadSwitch        | 控制负载设置状态                                             | CR/Nova  | 队列指令 |
 | TCPSpeed          | 开启强制速度                                                 | CR/Nova  | 队列指令 |
 | TCPSpeedEnd       | 关闭强制速度                                                 | CR/Nova  | 队列指令 |
+| PalletCreate      | 创建托盘                                                     | CR/Nova  | 立即指令 |
+| GetPalletPose     | 获取托盘点位                                                 | CR/Nova  | 立即指令 |
+| SetUser     | 修改指定的用户坐标系                                                 | CR/Nova  | 立即指令 |
+| SetTool     | 修改指定的工具坐标系                                                 | CR/Nova  | 立即指令 |
+| CalcUser     | 计算用户坐标系                                                 | CR/Nova  | 立即指令 |
+| CalcTool     | 计算工具坐标系                                                 | CR/Nova  | 立即指令 |
+| RelPointUser | 对指定点位沿指定用户坐标系进行偏移 | CR/Nova | 立即指令 |
+| RelPointTool | 对指定点位沿指定工具坐标系进行偏移 | CR/Nova | 立即指令 |
+| SetHomeCalibration | 机器人标定零点指令 | CR/Nova | 立即指令 |
+| SetGlobalVar | 设置全局变量 | CR/Nova | 立即指令 |
+| GetGlobalVar | 获取全局变量 | CR/Nova | 立即指令 |
+| SetAxisLimit | 设置软限位 | CR/Nova | 立即指令 |
+| GetAxisLimit | 获取软限位 | CR/Nova | 立即指令 |
 
 - 上位机可以通过控制端口直接发送运动相关命令给机器人，这些命令被称为运动指令。如表是控制指令指令列表。可以通过如下指令实现对机器人的运动相关控制；
 
@@ -159,8 +174,9 @@ English version of the README -> please [click here](./README-EN.md)
 | RelJointMovJ | 沿各轴关节坐标系进行相对运动指令，末端运动方式为关节运动 | CR\Nova  | 队列指令 |
 | Circle3      | 整圆运动                                                 | CR\Nova  | 队列指令 |
 | Wait         | 运动指令等待                                             | CR\Nova  | 队列指令 |
+| ServoJS      | 基于关节空间的动态跟随运动                               | CR\Nova  | 队列指令 |
 
-## 3.1 EnableRobot
+## 3.1.1 EnableRobot
 
 - 功能：使能机器人
 
@@ -206,7 +222,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**可选参数数量：0/1/4**  （不填参数，正常接收ErrorID返回0；填一个参数默认为负载重量参数,ErrorID返回0；填四个参数分别表示负载重量、X方向偏心距、Y方向偏心距以及Z方向偏心距，ErrorID返回0;失败返回错误码,参考第五章；）
 
 
-## 3.2 DisableRobot
+## 3.1.2 DisableRobot
 
 - 功能：下使能机器人
 
@@ -224,7 +240,7 @@ English version of the README -> please [click here](./README-EN.md)
 
   DisableRobot()
 
-## 3.3 ClearError
+## 3.1.3 ClearError
 
 - 功能：清错机器人
 
@@ -245,7 +261,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：清除报警后，用户可以根据RobotMode来判断机器人是否还处于报警状态；对于清除不掉的报警需要重启控制柜解决；(详见GetErrorID说明)；清除报警后需要重新发送EnableRobot()指令方可发送运动指令
 
 
-## 3.4 ResetRobot
+## 3.1.4 ResetRobot
 
 - 功能：机器人停止
 
@@ -265,7 +281,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 说明：该指令用于停止运动指令，用户发送该指令后机器人会立刻停止，不再执行未完成的运动指令。
 
-## 3.5 SpeedFactor
+## 3.1.5 SpeedFactor
 
 - 功能：设置全局速度比例。 
 
@@ -291,7 +307,7 @@ English version of the README -> please [click here](./README-EN.md)
   | --------------- | -------------------- | ------------------------------ |
   | SpeedFactor(80) | 0,{},SpeedFactor(80) | 立即指令--设置全局速度比例为80 |
 
-## 3.6 User（队列指令）
+## 3.1.6 User（队列指令）
 
 - 功能：选择已标定的用户坐标系。 
 
@@ -319,7 +335,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------- | ------------ | ------------------------------- |
   | User(1) | 0,{},User(1) | 队列指令--设置当前用户坐标系为1 |
 
-## 3.7 Tool（队列指令）
+## 3.1.7 Tool（队列指令）
 
 - 功能：选择已标定的工具坐标系。 
 
@@ -347,7 +363,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------- | ------------ | ------------------------------- |
   | Tool(1) | 0,{},Tool(1) | 队列指令--设置当前工具坐标系为1 |
 
-## 3.8 **RobotMode**
+## 3.1.8 **RobotMode**
 
 - 功能：机器人状态。 
 
@@ -389,7 +405,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 其中运行状态包含：轨迹复现/拟合中、机器人运行状态以及脚本运行状态；
 
 
-## 3.9 PayLoad（队列指令）
+## 3.1.9 PayLoad（队列指令）
 
 - 功能：设置当前的负载
 
@@ -432,7 +448,7 @@ English version of the README -> please [click here](./README-EN.md)
   说明：为了兼容Lua的LoadSet，tcp指令支持LoadSet，使用LoadSet等同于调用PayLoad，另外要和LoadSwitch指令一起使用。
   
 
-## 3.10 DO（队列指令）
+## 3.1.10 DO（队列指令）
 
 - 功能：设置数字输出端口状态
 
@@ -462,7 +478,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：使用取值范围100-1000需要有拓展IO模块的硬件支持；由于该指令是队列指令，使用之前需要确保已发送EnableRobot()使机器人使能开启算法队列。
 
 
-## 3.11 DOExecute
+## 3.1.11 DOExecute
 
 - 功能：设置数字输出端口状态
 
@@ -492,7 +508,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：使用取值范围100-1000需要有拓展IO模块的硬件支持；
 
 
-## 3.12 ToolDO（队列指令）
+## 3.1.12 ToolDO（队列指令）
 
 - 功能：设置末端数字输出端口状态（队列指令)
 
@@ -522,7 +538,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：由于该指令是队列指令，使用之前需要确保已发送EnableRobot()使机器人使能开启算法队列。
 
 
-## 3.13 ToolDOExecute
+## 3.1.13 ToolDOExecute
 
 - 功能：设置末端数字输出端口状态
 
@@ -550,7 +566,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ToolDOExecute(1,1) | 0,{},ToolDOExecute(1,1) | 立即指令--末端DO[1]输出高电平 |
 
 
-## 3.14 AO（队列指令）
+## 3.1.14 AO（队列指令）
 
 - 功能：设置控制柜模拟输出端口的电压值
 
@@ -580,7 +596,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：暂时不支持电流；由于该指令是队列指令，使用之前需要确保已发送EnableRobot()使机器人使能开启算法队列。
 
 
-## 3.15 AOExecute
+## 3.1.15 AOExecute
 
 - 功能：设置控制柜模拟输出端口的电压值
 
@@ -609,7 +625,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 说明：暂时不支持电流；
 
-## 3.16 AccJ（队列指令）
+## 3.1.16 AccJ（队列指令）
 
 - 功能：设置关节加速度比例。该指令仅对MovJ、MovJIO、MovJR、 JointMovJ指令有效
 
@@ -636,7 +652,7 @@ English version of the README -> please [click here](./README-EN.md)
   | AccJ(50) | 0,{},AccJ(50) | 队列指令--关节加速度比例设置为50 |
   
 
-## 3.17 AccL（队列指令）
+## 3.1.17 AccL（队列指令）
 
 - 功能：设置笛卡尔加速度比例。该指令仅对MovL、MovLIO、MovLR、Jump、Arc、Circle3指令有效。 
 
@@ -663,7 +679,7 @@ English version of the README -> please [click here](./README-EN.md)
   | AccL(50) | 0,{},AccL(50) | 队列指令--笛卡尔加速度比例设置为50 |
   
 
-##  3.18 SpeedJ（队列指令）
+##  3.1.18 SpeedJ（队列指令）
 
 - 功能：设置关节速度比例。该指令仅对MovJ、MovJIO、MovJR、 JointMovJ指令有效。 
 
@@ -690,7 +706,7 @@ English version of the README -> please [click here](./README-EN.md)
   | SpeedJ(50) | 0,{},SpeedJ(50) | 队列指令--关节速度比例设置为50 |
   
 
-## 3.19 SpeedL（队列指令）
+## 3.1.19 SpeedL（队列指令）
 
 - 功能：设置笛卡尔速度比例。该指令仅对MovL、MovLIO、MovLR、Jump、Arc、Circle3指令有效。 
 
@@ -717,7 +733,7 @@ English version of the README -> please [click here](./README-EN.md)
   | SpeedL(50) | 0,{},SpeedL(50) | 队列指令--笛卡尔速度比例设置为50 |
   
 
-## 3.20 Arch（队列指令）
+## 3.1.20 Arch（队列指令）
 
 - 功能：设置Jump门型参数索引（起始点抬升高度、最大抬升高度、结束点下降高度）。 
 
@@ -744,7 +760,7 @@ English version of the README -> please [click here](./README-EN.md)
   | Arch(1) | 0,{},Arch(1) | 队列指令--设置Jump门型参数索引为1 |
   
 
-## 3.21 CP（队列指令）
+## 3.1.21 CP（队列指令）
 
 - 功能：设置CP比例。CP即平滑过渡，机械臂从起始点经过中间点到达终点时，经过中间点是以直角方式过渡还是以曲线方式过渡。该指令对Jump指令无效。 当R等于0时，表示关闭。
 
@@ -770,7 +786,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------ | ----------- | ------------------------ |
   | CP(50) | 0,{},CP(50) | 队列指令--设置CP比例为50 |
 
-## 3.22 SetArmOrientation（队列指令）
+## 3.1.22 SetArmOrientation（队列指令）
 
 - 功能：设置手系指令。 
 - 格式：SetArmOrientation(LorR,UorD,ForN,Config6)
@@ -796,7 +812,7 @@ English version of the README -> please [click here](./README-EN.md)
   SetArmOrientation(1,1,-1,1)
 
 
-## 3.23 PowerOn
+## 3.1.23 PowerOn
 
 - 功能：机器人上电。 
 
@@ -816,7 +832,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 - **说明：机器人上电到完成，需要等待大概10秒钟的时间再进行使能操作；**
 
-## 3.24 RunScript
+## 3.1.24 RunScript
 
 - 功能：运行脚本。 
 
@@ -844,7 +860,7 @@ English version of the README -> please [click here](./README-EN.md)
   | RunScript(abcd) | 0,{},RunScript(abcd); | 运行名称为abcd的脚本 |
   
 
-## 3.25 StopScript
+## 3.1.25 StopScript
 
 - 功能：停止脚本。 
 
@@ -864,7 +880,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------------ | ------------------ | ---------------- |
   | StopScript() | 0,{},StopScript(); | 停止当前运行脚本 |
 
-## 3.26 PauseScript
+## 3.1.26 PauseScript
 
 - 功能：暂停脚本。 
 
@@ -884,7 +900,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------------- | ------------------- | ---------------- |
   | PauseScript() | 0,{},PauseScript(); | 暂停当前运行脚本 |
 
-## 3.27 ContinueScript
+## 3.1.27 ContinueScript
 
 - 功能：继续脚本。 
 
@@ -904,7 +920,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ---------------- | ---------------------- | ------------------------ |
   | ContinueScript() | 0,{},ContinueScript(); | 继续运行当前被暂停的脚本 |
 
-## 3.28 SetSafeSkin（队列指令）
+## 3.1.28 SetSafeSkin（队列指令）
 
 - 功能：设置安全皮肤开关状态。 
 
@@ -933,7 +949,7 @@ English version of the README -> please [click here](./README-EN.md)
 
   说明：该指令生效前提为DOBOT+安全皮肤插件开启后。
 
-## 3.29 GetTraceStartPose
+## 3.1.29 GetTraceStartPose
 
 - 功能：获取轨迹拟合中首个点位。 
 
@@ -963,7 +979,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**本条指令在CR控制器3.5.2版本以及以上支持；**
 
 
-## 3.30 GetPathStartPose
+## 3.1.30 GetPathStartPose
 
 - 功能：获取轨迹复现中首个点位。 
 
@@ -993,7 +1009,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**本条指令在CR控制器3.5.2版本以及以上支持；**
 
 
-## 3.31 PositiveSolution
+## 3.1.31 PositiveSolution
 
 - 功能：正解。（给定机器人各关节的角度，计算出机器人末端的空间位置）
 
@@ -1033,7 +1049,7 @@ English version of the README -> please [click here](./README-EN.md)
   - 机器人的臂方向SetArmOrientation
 
 
-## 3.32 InverseSolution（队列指令）
+## 3.1.32 InverseSolution（队列指令）
 
 - 功能：逆解。（已知机器人末端的位置和姿态，计算机器人各关节的角度值）
 
@@ -1086,7 +1102,7 @@ English version of the README -> please [click here](./README-EN.md)
 
   返回：0,{0,0,-90,0,90,0},InverseSolution(0,-247,1050,-90,0,180,0,0,1,{0,0,-90,0,90,0});
 
-## 3.33 SetCollisionLevel（队列指令）
+## 3.1.33 SetCollisionLevel（队列指令）
 
 - 功能：设置碰撞等级。 
 
@@ -1114,7 +1130,7 @@ English version of the README -> please [click here](./README-EN.md)
   | SetCollisionLevel(1) | 0,{},SetCollisionLevel(1); | 队列指令--设置碰撞等级 1 |
   
 
-## 3.34 HandleTrajPoints
+## 3.1.34 HandleTrajPoints
 
 - 功能：轨迹文件的预处理。
 
@@ -1145,7 +1161,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**本条指令在CR控制器3.5.2版本以及以上支持；**
 
 
-## 3.35 GetSixForceData
+## 3.1.35 GetSixForceData
 
 - 功能：获取六维力数据
 
@@ -1165,7 +1181,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ----------------- | ---------------------------------------------- | ------------------------ |
   | GetSixForceData() | 0,{0.0,0.0,0.0,0.0,0.0,0.0},GetSixForceData(); | 立即指令--获取六维力数据 |
 
-## 3.36 GetAngle
+## 3.1.36 GetAngle
 
 - 功能：获取关节坐标系下机械臂的实时位姿
 
@@ -1186,7 +1202,7 @@ English version of the README -> please [click here](./README-EN.md)
    | GetAngle() | 0,{0.0,0.0,90.0,0.0,-90.0,0.0},GetAngle(); | 立即指令--获取关节坐标系下机械臂的实时位姿 |
 
 
-## 3.37 GetPose
+## 3.1.37 GetPose
 
 - 功能：获取笛卡尔坐标系下机械臂的实时位姿
 
@@ -1219,7 +1235,7 @@ English version of the README -> please [click here](./README-EN.md)
   | GetPose(User=1,Tool=0) | 0,{0.0,-246.0,847.0,-90.0,0.0,-180.0},GetPose(User=1,Tool=0); | 立即指令--获取 用户坐标系索引号1 , 工具坐标系索引号0 下笛卡尔坐标系机械臂的实时位姿 |
   
 
-## 3.38 EmergencyStop
+## 3.1.38 EmergencyStop
 
 - 功能：急停
 
@@ -1241,7 +1257,7 @@ English version of the README -> please [click here](./README-EN.md)
    | --------------- | --------------------- | --------------------------------- |
    | EmergencyStop() | 0,{},EmergencyStop(); | 立即指令--V3控制器急停 机器人下电 |
 
-## 3.39 ModbusCreate
+## 3.1.39 ModbusCreate
 
 - 功能：创建modbus主站。 
 
@@ -1258,7 +1274,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ip       | string | 从站ip地址；                                                 | 是       |
   | port     | int    | 从站端口;                                                    | 是       |
   | slave_id | int    | 从站ID（取值范围大于0的整数）                                | 是       |
-  | isRTU    | int    | **可选参数**，取值范围0/1：<br />       如果为空或者值为0，建立modbusTCP通信；<br />       如果为1，建立modbusRTU通信；<br /> | 是       |
+  | isRTU    | int    | **可选参数**，取值范围0/1：<br />       如果为空或者值为0，建立modbusTCP通信；<br />       如果为非0，建立modbusRTU通信；<br /> | 是       |
 
 
 - 返回：
@@ -1274,7 +1290,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.40 ModbusClose
+## 3.1.40 ModbusClose
 
 - 功能：和Modbus从站断开连接,释放主站。 
 
@@ -1304,7 +1320,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.41 GetInBits
+## 3.1.41 GetInBits
 
 - 功能：读离散输入功能。 
 
@@ -1337,7 +1353,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.42 GetInRegs
+## 3.1.42 GetInRegs
 
 - 功能：读输入寄存器。 
 
@@ -1353,7 +1369,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------- | ------ | ------------------------------------------------------------ | -------- |
   | index   | int    | 返回的主站索引；                                             | 是       |
   | addr    | int    | 视从站配置而定；                                             | 是       |
-  | count   | int    | 个数，取值范围：1 -4                                         | 是       |
+  | count   | int    | 获取值的个数，取值范围：1 -4                                 | 是       |
   | valType | string | 可选参数，<br />如果为空，默认读取16位无符号整数（2个字节，占用1个寄存器）<br />U16: 读取16位无符号数（2个字节，占用1个寄存器）<br />U32: 读取32位无符号数（4个字节，占用2个寄存器）<br />F32: 读取32位浮点数（4个字节，占用2个寄存器）<br />F64: 读取64位浮点数（8个字节，占用4个寄存器） | 否       |
 
 
@@ -1371,7 +1387,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.43 GetCoils
+## 3.1.43 GetCoils
 
 - 功能：读线圈功能。 
 
@@ -1383,11 +1399,11 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 参数详解：
 
-  | 参数名 | 类型 | 含义               | 是否必填 |
-  | ------ | ---- | ------------------ | -------- |
-  | index  | int  | 返回的主站索引；   | 是       |
-  | addr   | int  | 视从站配置而定；   | 是       |
-  | count  | int  | 个数，取值范围1~16 | 是       |
+  | 参数名 | 类型 | 含义                       | 是否必填 |
+  | ------ | ---- | -------------------------- | -------- |
+  | index  | int  | 返回的主站索引；           | 是       |
+  | addr   | int  | 视从站配置而定；           | 是       |
+  | count  | int  | 获取值的个数，取值范围1~16 | 是       |
 
 
 - 返回：
@@ -1404,7 +1420,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.44 SetCoils
+## 3.1.44 SetCoils
 
 - 功能：写线圈功能。 
 
@@ -1416,12 +1432,12 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 参数详解：
 
-  | 参数名 | 类型   | 含义               | 是否必填 |
-  | ------ | ------ | ------------------ | -------- |
-  | index  | int    | 返回的主站索引；   | 是       |
-  | addr   | int    | 视从站配置而定；   | 是       |
-  | count  | int    | 个数，取值范围1~16 | 是       |
-  | valTab | string | 写线圈地址值；     | 是       |
+  | 参数名 | 类型   | 含义                       | 是否必填 |
+  | ------ | ------ | -------------------------- | -------- |
+  | index  | int    | 返回的主站索引；           | 是       |
+  | addr   | int    | 视从站配置而定；           | 是       |
+  | count  | int    | 写入值的个数，取值范围1~16 | 是       |
+  | valTab | string | 写线圈地址值；             | 是       |
 
 
 - 返回：
@@ -1438,7 +1454,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.45 GetHoldRegs
+## 3.1.45 GetHoldRegs
 
 - 功能：读保持寄存器。 
 
@@ -1454,7 +1470,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------- | ------ | ------------------------------------------------------------ | -------- |
   | index   | int    | index,返回的主站索引，最多支持5个设备,取值范围(0~4)；        | 是       |
   | addr    | int    | 保持寄存器的起始地址。视从站配置而定；                       | 是       |
-  | count   | int    | 读取指定数量type类型的数据。取值范围：1~4                    | 是       |
+  | count   | int    | 获取值的个数。取值范围：1~4                                  | 是       |
   | valType | string | 数据类型：<br /> 如果为空，默认读取16位无符号整数（2个字节，占用1个寄存器）<br /> U16：读取16位无符号整数（2个字节，占用1个寄存器）<br /> U32：读取32位无符号整数（4个字节，占用2个寄存器）<br /> F32：读取32位单精度浮点数（4个字节，占用2个寄存器）<br /> F64：读取64位双精度浮点数（8个字节，占用4个寄存器） | 否       |
 
 
@@ -1472,7 +1488,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.46 SetHoldRegs
+## 3.1.46 SetHoldRegs
 
 - 功能：写保存寄存器。 
 
@@ -1488,7 +1504,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------- | ------ | ------------------------------------------------------------ | -------- |
   | index   | int    | index,返回的主站索引，最多支持5个设备,取值范围(0~4)          | 是       |
   | addr    | int    | 保持寄存器的起始地址。视从站配置而定；                       | 是       |
-  | count   | int    | 写入指定数量type类型的数据。取值范围：1~4                    | 是       |
+  | count   | int    | 写入值的个数。取值范围：1~4                                  | 是       |
   | valTab  | string | 保持寄存器地址的值                                           | 是       |
   | valType | string | 数据类型     <br /> 如果为空，默认读取16位无符号整数（2个字节，占用1个寄存器） <br /> U16：读取16位无符号整数（2个字节，占用1个寄存器）  <br />U32：读取32位无符号整数（4个字节，占用2个寄存器）   <br />F32：读取32位单精度浮点数（4个字节，占用2个寄存器）    <br /> F64：读取64位双精度浮点数（8个字节，占用4个寄存器） | 否       |
 
@@ -1507,7 +1523,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持；**
 
 
-## 3.47 GetErrorID
+## 3.1.47 GetErrorID
 
 - 功能：获取机器人错误码
 - 格式：GetErrorID()
@@ -1535,7 +1551,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 - **控制器3.5.2版本以及以上版本支持；**
 
-## 3.48 DI
+## 3.1.48 DI
 
 - 功能：获取数字量输入端口状态
 
@@ -1565,7 +1581,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：使用取值范围100-1000需要有拓展IO模块的硬件支持；
 
 
-## 3.49 ToolDI
+## 3.1.49 ToolDI
 
 - 功能：获取末端数字量输入端口状态
 
@@ -1593,7 +1609,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ToolDI(2) | 0,{1},ToolDI(2) | 立即指令--末端数字输入端口2为高电平 |
 
 
-## 3.50 AI
+## 3.1.50 AI
 
 - 功能：获取模拟量输入端口电压值
 
@@ -1620,7 +1636,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ----- | ------------- | ------------------------------------- |
   | AI(2) | 0,{3.5},AI(2) | 立即指令--模拟输入端口2的电压值为3.5V |
 
-## 3.51 ToolAI
+## 3.1.51 ToolAI
 
 - 功能：获取末端模拟量输入端口电压值
 
@@ -1647,7 +1663,7 @@ English version of the README -> please [click here](./README-EN.md)
   | --------- | ----------------- | ----------------------------------------- |
   | ToolAI(1) | 0,{1.5},ToolAI(1) | 立即指令--末端模拟输入端口1的电压值为1.5V |
 
-## 3.52 DIGroup
+## 3.1.52 DIGroup
 
 - 功能：获取输入组端口状态
 
@@ -1679,7 +1695,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：使用取值范围100-1000需要有拓展IO模块的硬件支持；
 
 
-## 3.53 DOGroup
+## 3.1.53 DOGroup
 
 - 功能：设置输出组端口状态
 
@@ -1712,7 +1728,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 说明：使用取值范围100-1000需要有拓展IO模块的硬件支持；
 
-## 3.54 BrakeControl
+## 3.1.54 BrakeControl
 
 - 功能：开关抱闸
 
@@ -1744,7 +1760,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持此命令；**
 
 
-## 3.55 StartDrag
+## 3.1.55 StartDrag
 
 - 功能：进入拖拽(在报错状态下，不可进入拖拽)
 
@@ -1767,7 +1783,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持此命令；**
 
 
-## 3.56 StopDrag
+## 3.1.56 StopDrag
 
 - 功能：退出拖拽
 
@@ -1790,7 +1806,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持此命令；**
 
 
-## 3.57 SetCollideDrag
+## 3.1.57 SetCollideDrag
 
 - 功能：设置是否强制进入拖拽（报错状态下也能进入拖拽）
 
@@ -1820,7 +1836,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本以及以上版本支持此命令；**
 
 
-## 3.58 SetTerminalKeys
+## 3.1.58 SetTerminalKeys
 
 - 功能：设置末端按键功能使能状态
 
@@ -1850,7 +1866,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**只在特定版本支持此命令**
 
 
-## 3.59 SetTerminal485
+## 3.1.59 SetTerminal485
 
 - 功能：设置末端485参数
 
@@ -1881,7 +1897,7 @@ English version of the README -> please [click here](./README-EN.md)
   | SetTerminal485(115200, 8, N, 1) | 0,{},SetTerminal485(115200, 8, N, 1) | 立即指令--设置机器人末端波特率为115200 |
 
 
-## 3.60 GetTerminal485
+## 3.1.60 GetTerminal485
 
 - 功能：获取末端485的参数
 
@@ -1893,7 +1909,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 返回：
 
-  ErrorID,{baudRate, dataLen, parityBit, stopBit},GetPose();     //{baudRate, dataLen, parityBit, stopBit}分别表示波特率，数据位，奇偶校验位，停止位
+  ErrorID,{baudRate, dataLen, parityBit, stopBit},GetTerminal485();     //{baudRate, dataLen, parityBit, stopBit}分别表示波特率，数据位，奇偶校验位，停止位
 
 - 示例：
 
@@ -1902,7 +1918,7 @@ English version of the README -> please [click here](./README-EN.md)
   | GetTerminal485() | 0,{115200, 8, N, 1},GetTerminal485() | 立即指令--获取机器人末端485的参数 |
   
 
-## 3.61 LoadSwitch（队列指令）
+## 3.1.61 LoadSwitch（队列指令）
 
 - 功能：控制负载设置状态
 
@@ -1928,7 +1944,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------------- | ------------------ | ---------------------- |
   | LoadSwitch(1) | 0,{},LoadSwitch(1) | 队列指令--开启负载设置 |
 
-## 3.62 TCPSpeed（队列指令）
+## 3.1.62 TCPSpeed（队列指令）
 
 - 功能：当进入到TCPSpeed指令时时，笛卡尔运动以绝对速度运行，不影响关节运动；机器人进入缩减模式后，也受缩减模式下最大全局速度的限制；与焊接冲突时，以焊接指令为准。
 
@@ -1954,7 +1970,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ------------- | ------------------ | ----------------------------- |
   | TCPSpeed(100) | 0,{},TCPSpeed(100) | 队列指令--设置绝对速度100mm/s |
 
-## 3.63 TCPSpeedEnd（队列指令）
+## 3.1.63 TCPSpeedEnd（队列指令）
 
 - 功能：和TCPSpeed指令搭配使用，该指令表示关闭强制速度
 
@@ -1976,7 +1992,429 @@ English version of the README -> please [click here](./README-EN.md)
   | ------------- | ------------------ | ---------------------- |
   | TCPSpeedEnd() | 0,{},TCPSpeedEnd() | 队列指令--关闭绝对速度 |
 
-## 3.64 MovJ（队列指令）
+## 3.1.64 PalletCreate
+
+- 功能：创建托盘
+
+- PalletCreate(P1,P2,P3,P4,row,col,Palletname)
+
+- 参数数量：27
+
+- 支持端口：29999
+
+- 参数详解：27
+
+- | 参数名     | 类型   | 含义                                   | 是否必填 |
+  | ---------- | ------ | -------------------------------------- | -------- |
+  | P1         | double | 笛卡尔坐标点 P1 {X1,Y1,Z1,Rx1,Ry1,Rz1} | 是       |
+  | P2         | double | 笛卡尔坐标点 P2 {X2,Y2,Z2,Rx2,Ry2,Rz2} | 是       |
+  | P3         | double | 笛卡尔坐标点 P3 {X3,Y3,Z3,Rx3,Ry3,Rz3} | 是       |
+  | P4         | double | 笛卡尔坐标点 P4 {X3,Y3,Z3,Rx3,Ry3,Rz3} | 是       |
+  | row        | int    | 行数                                   | 是       |
+  | col        | int    | 列数                                   | 是       |
+  | Palletname | string | 托盘名称                               | 是       |
+
+- 返回：
+
+- | 返回值 | 类型 | 含义                            |
+  | ------ | ---- | ------------------------------- |
+  | number | int  | 已创建的托盘数量，最大限制为20. |
+
+  ErrorID,{number},PalletCreate(P1,P2,P3,P4,row,col,Palletname);   
+
+  
+
+- 示例：
+
+  | 示例                                                         | 返回                                                         | 含义                                                       |
+  | ------------------------------------------------------------ | ------------------------------------------------------------ | ---------------------------------------------------------- |
+  | PalletCreate({56,-568,337,175.5755,1,14},<br />{156,-568,337,175.5755,1,14},<br />{156,-468,337,175.5755,1,14},<br />{56,-468,337,175.5755,1,14},row=10,col=10,pallet1) | ErrorID,{1},PalletCreate(<br />{56,-568,337,175.5755,1,14},<br />{156,-568,337,175.5755,1,14},<br />{156,-468,337,175.5755,1,14},<br />{56,-468,337,175.5755,1,14},row=10,col=10,pallet1); | 成功创建一个名为pallet1十行十列的托盘，目前创建托盘数量为1 |
+
+## 3.1.65 GetPalletPose
+
+- 功能：获取托盘点位
+
+- GetPalletPose(Palletname,index)
+
+- 参数数量：2
+
+- 支持端口：29999
+
+- 参数详解：2
+
+  | 参数名     | 类型   | 含义     | 是否必填 |
+  | ---------- | ------ | -------- | -------- |
+  | Palletname | string | 托盘名称 | 是       |
+  | index      | int    | 点位索引 | 是       |
+
+- 返回：
+
+  ErrorID,{X,Y,Z,Rx,Ry,Rz},GetPalletPose(Palletname,index);   
+
+- 示例：
+
+  | 示例                     | 返回                                                         | 含义                                 |
+  | ------------------------ | ------------------------------------------------------------ | ------------------------------------ |
+  | GetPalletPose(pallet1,5) | 0,{156.000000,-568.000000,337.000000,<br />175.575500,1.000000,14.000000},GetPalletPose(pallet1,5); | 返回pallet1托盘，索引号为5的点位信息 |
+
+
+## 3.1.66 SetUser（立即指令）
+
+- 功能：修改指定的用户坐标系。
+
+- 格式：SetUser(index, table)
+
+- 参数数量：2
+
+- 支持端口：29999
+
+- 参数详解：
+
+  | 参数名 | 类型 | 含义                 | 是否必填 |
+  | ------ | ---- | -------------------- | -------- |
+  | index  | int  | 坐标索引（0~9）      | 是       |
+  | table  | int  | 准备修改的用户坐标系 | 是       |
+
+- 返回：
+
+  ErrorID,{},SetUser(index, table);
+
+- 示例：
+
+  | 示例                           | 返回                                 | 说明          |
+  | ------------------------------ | ------------------------------------ | ------------- |
+  | SetUser(1,{10,10,10,10,10,10}) | 0,{},SetUser(1,{10,10,10,10,10,10}); | 设置用户坐标1 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.67 SetTool（立即指令）
+
+- 功能：修改指定的工具坐标系。
+
+- 格式：SetTool(index, table)
+
+- 参数数量：2
+
+- 支持端口：29999
+
+- 参数详解：
+
+  | 参数名 | 类型 | 含义                 | 是否必填 |
+  | ------ | ---- | -------------------- | -------- |
+  | index  | int  | 坐标索引（0~9）      | 是       |
+  | table  | int  | 准备修改的工具坐标系 | 是       |
+
+- 返回：
+
+  ErrorID,{},SetTool(index, table);
+
+- 示例：
+
+  | 示例                           | 返回                                 | 说明          |
+  | ------------------------------ | ------------------------------------ | ------------- |
+  | SetTool(1,{10,10,10,10,10,10}) | 0,{},SetTool(1,{10,10,10,10,10,10}); | 设置工具坐标1 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.68 CalcUser（立即指令）
+
+- 功能：计算用户坐标系。
+
+- 格式：CalcUser(index,matrix_direction,table)
+
+- 参数数量：3
+
+- 支持端口：29999
+
+- 参数详解：
+
+  | 参数名           | 类型 | 含义                                                         | 是否必填 |
+  | ---------------- | ---- | ------------------------------------------------------------ | -------- |
+  | index            | int  | 坐标索引（0~9）                                              | 是       |
+  | matrix_direction | int  | 计算的方向（0或1）,0：右乘，表示index指定的坐标系沿自己偏转table指定的值,1：左乘，表示index指定的坐标系沿基坐标偏转table指定的值 | 是       |
+  | table            | int  | 用户坐标系偏移值                                             | 是       |
+
+- 返回：
+
+  ErrorID,{a,b,c,x,y,z},CalcUser(index,matrix_direction,table);
+
+- 示例：
+
+  | 示例                              | 返回                                             | 说明            |
+  | --------------------------------- | ------------------------------------------------ | --------------- |
+  | CalcUser(1,1,{10,10,10,10,10,10}) | 0,{a,b,c,x,y,z},CalcUser(1,{10,10,10,10,10,10}); | 计算用户坐标系1 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.69 CalcTool（立即指令）
+
+- 功能：计算工具坐标系。
+
+- 格式：CalcTool(index,matrix_direction,table)
+
+- 参数数量：3
+
+- 支持端口：29999
+
+- 参数详解：
+
+  | 参数名           | 类型 | 含义                                                         | 是否必填 |
+  | ---------------- | ---- | ------------------------------------------------------------ | -------- |
+  | index            | int  | 坐标索引（0~9）                                              | 是       |
+  | matrix_direction | int  | 计算的方向（0或1）,0：右乘，表示index指定的坐标系沿自己偏转table指定的值,1：左乘，表示index指定的坐标系沿基坐标偏转table指定的值 | 是       |
+  | table            | int  | 工具坐标系偏移值                                             | 是       |
+
+- 返回：
+
+  ErrorID,{a,b,c,x,y,z},CalcTool(index,matrix_direction,table);
+
+- 示例：
+
+  | 示例                              | 返回                                             | 说明            |
+  | --------------------------------- | ------------------------------------------------ | --------------- |
+  | CalcTool(1,1,{10,10,10,10,10,10}) | 0,{a,b,c,x,y,z},CalcTool(1,{10,10,10,10,10,10}); | 计算工具坐标系1 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.70 RelPointUser（立即指令）
+
+- 功能：对指定点位沿指定用户坐标系进行偏移
+
+- 格式：
+
+  RelPointUser(X,Y,Z,Rx,Ry,Rz,OffsetX,OffsetY,OffsetZ,OffsetRx,OffsetRy,OffsetRz)  
+
+- 必填参数数量：12
+
+- 支持端口：29999
+
+- 必填参数详解：12
+
+  | 参数名  | 类型   | 含义                                  | 是否必填 |
+  | ------- | ------ | ------------------------------------- | -------- |
+  | X       | double | X轴位置，单位：毫米                   | 是       |
+  | Y       | double | Y轴位置，单位：毫米                   | 是       |
+  | Z       | double | Z轴位置，单位：毫米                   | 是       |
+  | Rx      | double | Rx轴位置，单位：度                    | 是       |
+  | Ry      | double | Ry轴位置，单位：度                    | 是       |
+  | Rz      | double | Rz轴位置，单位：度                    | 是       |
+  | Offset1 | double | 沿用户坐标系下x方向的偏移量，单位：mm | 是       |
+  | Offset2 | double | 沿用户坐标系下y方向的偏移量，单位：mm | 是       |
+  | Offset3 | double | 沿用户坐标系下z方向的偏移量，单位：mm | 是       |
+  | Offset4 | double | 沿用户坐标系下Rx的偏移量，单位：度    | 是       |
+  | Offset5 | double | 沿用户坐标系下Ry的偏移量，单位：度    | 是       |
+  | Offset6 | double | 沿用户坐标系下Rz的偏移量，单位：度    | 是       |
+
+- 返回：
+
+  ErrorID,{},RelPointUser(X,Y,Z,Rx,Ry,Rz)
+
+- 示例：
+
+- | 示例 | RelPointUser (-693.7,65.9,453.7,174.5,-5.6,157.3,0,0,100,0,0,0) |
+  | ---- | ------------------------------------------------------------ |
+  | 返回 | 0,{-693.700012,65.900002,553.700012,174.500000,-5.600000,157.300003},RelPointUser (-693.7,65.9,453.7,174.5,-5.6,157.3,0,0,100,0,0,0) |
+  | 说明 | 立即指令--将输入点位沿用户坐标系向z偏移100mm，返回偏移后的点位坐标 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.71 RelPointTool（立即指令）
+
+- 功能：对指定点位沿指定工具坐标系进行偏移
+
+- 格式：
+
+  RelPointTool(X,Y,Z,Rx,Ry,Rz,OffsetX,OffsetY,OffsetZ,OffsetRx,OffsetRy,OffsetRz)  
+
+- 必填参数数量：12
+
+- 支持端口：29999
+
+- 必填参数详解：12
+
+  | 参数名  | 类型   | 含义                                  | 是否必填 |
+  | ------- | ------ | ------------------------------------- | -------- |
+  | X       | double | X轴位置，单位：毫米                   | 是       |
+  | Y       | double | Y轴位置，单位：毫米                   | 是       |
+  | Z       | double | Z轴位置，单位：毫米                   | 是       |
+  | Rx      | double | Rx轴位置，单位：度                    | 是       |
+  | Ry      | double | Ry轴位置，单位：度                    | 是       |
+  | Rz      | double | Rz轴位置，单位：度                    | 是       |
+  | Offset1 | double | 沿工具坐标系下x方向的偏移量，单位：mm | 是       |
+  | Offset2 | double | 沿工具坐标系下y方向的偏移量，单位：mm | 是       |
+  | Offset3 | double | 沿工具坐标系下z方向的偏移量，单位：mm | 是       |
+  | Offset4 | double | 沿工具坐标系下Rx的偏移量，单位：度    | 是       |
+  | Offset5 | double | 沿工具坐标系下Ry的偏移量，单位：度    | 是       |
+  | Offset6 | double | 沿工具坐标系下Rz的偏移量，单位：度    | 是       |
+
+- 返回：
+
+  ErrorID,{},RelPointTool(X,Y,Z,Rx,Ry,Rz)
+
+- 示例：
+
+- | 示例 | RelPointTool (-693.7,65.9,453.7,174.5,-5.6,157.3,0,0,100,0,0,0) |
+  | ---- | ------------------------------------------------------------ |
+  | 返回 | 0,{-698.962219,78.490585,354.635468,174.500000,-5.600000,157.300003},RelPointTool (-693.7,65.9,453.7,174.5,-5.6,157.3,0,0,100,0,0,0) |
+  | 说明 | 立即指令--将输入点位沿工具坐标系向z偏移100mm，返回偏移后的点位坐标 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.72 **SetHomeCalibration**（立即指令）
+
+- 功能：机器人标定零点指令
+- 格式：SetHomeCalibration(password)
+
+- 必填参数数量：1
+- 支持端口：29999
+- 必填参数详解：1
+
+| 参数名   | 类型 | 含义       | 是否必填 |
+| -------- | ---- | ---------- | -------- |
+| password | int  | 管理员密码 | 是       |
+
+- 返回：
+
+  ErrorID,{},SetHomeCalibration(password)
+
+- 示例：
+
+| 示例 | SetHomeCalibration(888888)                                   |
+| ---- | ------------------------------------------------------------ |
+| 返回 | 0,{},SetHomeCalibration(888888)                              |
+| 说明 | 机器人处于使能模式才可使用标零指令。<br />该指令为同步指令，需要正常完成标零以及下使能操作后，才返回。 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.73 **SetGlobalVar**（立即指令）
+
+- 功能：设置全局变量
+- 格式：SetGlobalVar(name,value)
+- 必填参数数量：2
+- 支持端口：29999
+- 必填参数详解：2 
+
+说明：
+
+- **value数据类型有五种，根据不同的数据类型，输入并不一样。**
+- **全局变量设置功能会根据对应全局变量的”globalHold“是否为true，决定是否同步更改json文件。当”globalHold“为false时，仅更新控制器内存中的变量内容。**
+
+| 参数名 | 类型                        | 含义         | 是否必填 |
+| ------ | --------------------------- | ------------ | -------- |
+| name   | string                      | 全局变量名称 | 是       |
+| value  | int/string/float/bool/point | 全局变量内容 | 是       |
+
+- 返回：
+
+  ErrorID,{},SetGlobalVar(name,value)
+
+- 示例：
+
+| 示例1     | SetGlobalVar(var_1,123)                                      |
+| --------- | ------------------------------------------------------------ |
+| **返回**  | 0,{},SetGlobalVar(var_1,123)                                 |
+| **说明**  | 修改全局变量var_1，数据类型为int，修改为123                  |
+| **示例2** | SetGlobalVar(var_1,"abc")                                    |
+| **返回**  | 0,{},SetGlobalVar(var_1,"abc")                               |
+| **说明**  | 修改全局变量var_1，数据类型为string，修改为"abc"             |
+| **示例3** | SetGlobalVar(var_1,true)                                     |
+| **返回**  | 0,{},SetGlobalVar(var_1,true)                                |
+| **说明**  | 修改全局变量var_1，数据类型为bool，修改为true                |
+| **示例4** | SetGlobalVar(var_1,10.5)                                     |
+| **返回**  | 0,{},SetGlobalVar(var_1,10.5)                                |
+| **说明**  | 修改全局变量var_1，数据类型为float，修改为10.5               |
+| **示例5** | SetGlobalVar(var_1,"coordinate":{50.34,-245.07,945.8,-89.03,3.12,-176.52},"armOrientation":{1,-1,1,0},"user":0,"tool":0) |
+| **返回**  | 0,{},SetGlobalVar(var_1,"coordinate":{50.34,-245.07,945.8,-89.03,3.12,-176.52},"armOrientation":{1,-1,1,0},"user":0,"tool":0) |
+| **说明**  | 修改全局变量var_1，数据类型为point，修改为"coordinate":{50.34,-245.07,945.8,-89.03,3.12,-176.52},"armOrientation":{1,-1,1,0},"user":0,"tool":0 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.74 **GetGlobalVar**（立即指令）
+
+- 功能：获取全局变量
+- 格式：GetGlobalVar(name)
+- 必填参数数量：1
+- 支持端口：29999
+- 必填参数详解：1
+
+| 参数名 | 类型   | 含义         | 是否必填 |
+| ------ | ------ | ------------ | -------- |
+| name   | string | 全局变量名称 | 是       |
+
+- 返回：
+
+  ErrorID,{value},GetGlobalVar(name)
+
+- 示例：
+
+
+| 示例                | 返回                        | 说明                               |
+| ------------------- | --------------------------- | ---------------------------------- |
+| GetGlobalVar(var_1) | 0,{123},GetGlobalVar(var_1) | 获取全局变量var_1的内容，内容为123 |
+
+- 说明：**控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.1.75 **SetAxisLimit**（立即指令）
+
+- 功能：修改软限位
+- 格式：SetAxisLimit(J1-,J1+,J2-,J2+,J3-,J3+,J4-,J4+,J5-,J5+,J6-,J6+)
+- 必填参数数量：12
+- 支持端口：29999
+- 必填参数详解：12
+
+- | 参数名 | 类型   | 含义             | 是否必填 |
+  | ------ | ------ | ---------------- | -------- |
+  | J1-    | double | 关节一负限位数值 | 是       |
+  | J1+    | double | 关节一正限位数值 | 是       |
+  | J2-    | double | 关节二负限位数值 | 是       |
+  | J2+    | double | 关节二正限位数值 | 是       |
+  | J3-    | double | 关节三负限位数值 | 是       |
+  | J3+    | double | 关节三正限位数值 | 是       |
+  | J4-    | double | 关节四负限位数值 | 是       |
+  | J4+    | double | 关节四正限位数值 | 是       |
+  | J5-    | double | 关节五负限位数值 | 是       |
+  | J5+    | double | 关节五正限位数值 | 是       |
+  | J6-    | double | 关节六负限位数值 | 是       |
+  | J6+    | double | 关节六正限位数值 | 是       |
+
+- 返回：
+
+  ErrorID,{},SetAxisLimit(J1-,J1+,J2-,J2+,J3-,J3+,J4-,J4+,J5-,J5+,J6-,J6+)
+
+- 示例：
+
+| 示例                                                         | 返回                                                         | 说明                 |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | -------------------- |
+| SetAxisLimit(-357, 357,-178, 178,-164, 164,-178, 178,-178, 178,-357,357) | 0,{},SetAxisLimit(-357, 357,-178, 178,-164, 164,-178, 178,-178, 178,-357,357) | 修改控制器软限位数值 |
+
+- 说明：
+- **控制器3.5.7版本及以上版本支持此命令；**
+- **控制器需要处于下使能状态，方可使用该指令；**
+
+
+
+## 3.1.76 ****GetAxisLimit****（立即指令）
+
+- 功能：获取软限位
+- 格式：GetAxisLimit()
+- 必填参数数量：0
+- 支持端口：29999
+- 必填参数详解：0
+
+- 返回：
+
+​		ErrorID,{J1-,J1+,J2-,J2+,J3-,J3+,J4-,J4+,J5-,J5+,J6-,J6+},GetAxisLimit()
+
+- 示例：
+
+| 示例           | 返回                                                         | 说明                 |
+| -------------- | ------------------------------------------------------------ | -------------------- |
+| GetAxisLimit() | 0,{-357, 357,-178, 178,-164, 164,-178, 178,-178, 178,-357,357},GetAxisLimit() | 获取控制器软限位数值 |
+
+- 说明：
+- **控制器3.5.7版本及以上版本支持此命令；**
+
+## 3.2.1 MovJ（队列指令）
 
 - 功能：点到点运动，目标点位为笛卡尔点位。
 
@@ -2009,7 +2447,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ----------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
   | MovJ(-500,100,200,150,0,90,AccJ=50) | 0,{},MovJ(-500,100,200,150,0,90,AccJ=50) | 队列指令--点到点运动，目标点位为笛卡尔点位（-500,100,200,150,0,90），设置关节加速度百分比50 |
 
-## 3.65 MovL（队列指令）
+## 3.2.2 MovL（队列指令）
 
 - 功能：直线运动，目标点位为笛卡尔点位。
 
@@ -2043,7 +2481,7 @@ English version of the README -> please [click here](./README-EN.md)
   | MovL(-500,100,200,150,0,90,SpeedL=60) | 0,{},MovL(-500,100,200,150,0,90,SpeedL=60) | 队列指令--点到点运动，目标点位为笛卡尔点位（-500,100,200,150,0,90），设置笛卡尔速度比例60 |
 
 
-## 3.66 JointMovJ（队列指令）
+## 3.2.3 JointMovJ（队列指令）
 
 - 功能：点到点运动，目标点位为关节点位。
 
@@ -2077,7 +2515,7 @@ English version of the README -> please [click here](./README-EN.md)
   | JointMovJ(0,0,-90,0,90,0,SpeedJ=60,AccJ=50) | 0,{},JointMovJ(0,0,-90,0,90,0,SpeedJ=60,AccJ=50) | 队列指令--点到点运动，目标点位为关节点位（0,0,-90,0,90,0），设置关节速度比例60，加速度比例50 |
 
 
-## 3.67 MovLIO（队列指令）
+## 3.2.4 MovLIO（队列指令）
 
 - 功能：在直线运动时并行设置数字输出端口状态，目标点位为笛卡尔点位。
 
@@ -2114,7 +2552,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ---------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
   | MovLIO(-500,100,200,150,0,90,{0,50,1,0}) | 0,{},MovLIO(-500,100,200,150,0,90,{0,50,1,0})； | 队列指令--在直线运动时并行设置数字输出端口状态，目标点位为笛卡尔点位（-500,100,200,150,0,90），离起始点距离50，DO[1]设置为低电平 |
 
-## 3.68 MovJIO（队列指令）
+## 3.2.5 MovJIO（队列指令）
 
 - 功能：点到点运动时并行设置数字输出端口状态，目标点位为笛卡尔点位。
 
@@ -2151,7 +2589,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ---------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
   | MovJIO(-500,100,200,150,0,90,{0,50,1,0}) | 0,{},MovLIO(-500,100,200,150,0,90,{0,50,1,0})； | 队列指令--点到点运动时并行设置数字输出端口状态，目标点位为笛卡尔点位（-500,100,200,150,0,90），离起始点距离50，DO[1]设置为低电平 |
 
-## 3.69 Arc（队列指令）
+## 3.2.6 Arc（队列指令）
 
 - 功能：：从当前位置以圆弧插补方式移动至笛卡尔坐标系下的目标位置。
 
@@ -2193,7 +2631,7 @@ English version of the README -> please [click here](./README-EN.md)
   | MovL(-300,-150,200,150,0,90)<br />Arc(-350,-200,200,150,0,90,-300,-250,200,150,0,90) | 0,{},MovL(-300,-150,200,150,0,90)；<br />0,{},Arc(-350,-200,200,150,0,90,-300,-250,200,150,0,90) | 队列指令--确定圆弧起始点.<br />从当前位置以圆弧插补方式移动至笛卡尔坐标系下的目标位置 |
 
 
-## 3.70 ServoJ（队列指令）
+## 3.2.7 ServoJ（队列指令）
 
 - 功能：基于关节空间的动态跟随命令。
 
@@ -2225,7 +2663,13 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 说明：
 
-  客户二次开发使用频率建议设置为33Hz（30ms），即循环间隔至少设置30ms
+  客户二次开发使用频率建议设置为33Hz（30ms），即循环间隔至少设置30ms。
+
+  **备注：控制器3.5.5.0版本对该运动指令进行改版，不再受全局速度的影响。**
+
+  **安全问题需要注意：当目标关节点位与设备实际点位相差较大，运动时间t较小时，会导致伺服运动速度过快，可能会导致伺服报错甚至本体掉电停机。**
+
+  **使用问题需要注意：客户调用servoj时最好对运行点位进行速度规划，按照固定时间间隔t下发速度规划后的点位，保证机器人能平稳跟踪目标点位。**
 
 - 示例：
 
@@ -2233,7 +2677,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ---------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
   | ServoJ(0,0,-90,0,90,0, t=0.1, lookahead_time=50, gain=500) | 0,{},ServoJ(0,0,-90,0,90,0, t=0.1, lookahead_time=50, gain=500); | 队列指令--目标关节点位（0,0,-90,0,90,0）运行时间 0.1s<br />lookahead_time 为 50 <br />gain  目标位置的比例放大器为 500 |
 
-## 3.71 ServoP（队列指令）
+## 3.2.8 ServoP（队列指令）
 
 - 功能：基于笛卡尔空间的动态跟随命令。
 
@@ -2270,7 +2714,7 @@ English version of the README -> please [click here](./README-EN.md)
   | ----------------------------- | ----------------------------------- | ------------------------------------------------ |
   | ServoP(-500,100,200,150,0,90) | 0,{},ServoP(-500,100,200,150,0,90); | 队列指令--目标笛卡尔点位(-500,100,200,150,0,90） |
 
-## 3.72 MoveJog（队列指令）
+## 3.2.9 MoveJog（队列指令）
 
 - 功能：点动运动，不固定距离运动
 
@@ -2304,7 +2748,7 @@ English version of the README -> please [click here](./README-EN.md)
 
   说明：**控制器3.5.2版本及以上版本支持此命令；**其中用户若是再发关节点动运行则会忽略CoordType、User以及Tool这三个可选设置参数；
 
-## 3.73 StartTrace（队列指令）
+## 3.2.10 StartTrace（队列指令）
 
 - 功能：轨迹拟合。(轨迹文件笛卡尔点)
 
@@ -2335,7 +2779,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本及以上版本支持此命令；**
 
 
-## 3.74 StartPath（队列指令）
+## 3.2.11 StartPath（队列指令）
 
 - 功能：轨迹复现。(轨迹文件关节点)
 
@@ -2367,7 +2811,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 - 说明：**控制器3.5.2版本及以上版本支持此命令；**
 
-## 3.75 Sync（队列指令）
+## 3.2.12 Sync（队列指令）
 
 - 功能：阻塞程序执行队列指令，待所有队列指令执行完才返回。
 
@@ -2388,7 +2832,7 @@ English version of the README -> please [click here](./README-EN.md)
 | ------ | ------------ | ---------------------------- |
 | Sync() | 0,{},Sync(); | 队列指令--阻塞执行队列指令； |
 
-## 3.76 RelMovJTool（队列指令）
+## 3.2.13 RelMovJTool（队列指令）
 
 - 功能：沿工具坐标系进行相对运动指令，末端运动方式为关节运动。
 
@@ -2427,7 +2871,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本及以上版本支持此命令；**
 
 
-## 3.77 RelMovLTool（队列指令）
+## 3.2.14 RelMovLTool（队列指令）
 
 - 功能：沿工具坐标系进行相对运动指令，末端运动方式为直线运动。
 
@@ -2466,7 +2910,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本及以上版本支持此命令；**
 
 
-## 3.78 RelMovJUser（队列指令）
+## 3.2.15 RelMovJUser（队列指令）
 
 - 功能：沿用户坐标系进行相对运动指令，末端运动方式为关节运动。
 
@@ -2505,7 +2949,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本及以上版本支持此命令；**
 
 
-## 3.79 RelMovLUser（队列指令）
+## 3.2.16 RelMovLUser（队列指令）
 
 - 功能：沿用户坐标系进行相对运动指令，末端运动方式为直线运动。
 
@@ -2545,7 +2989,7 @@ English version of the README -> please [click here](./README-EN.md)
 
 
 
-## 3.80 RelJointMovJ（队列指令）
+## 3.2.17 RelJointMovJ（队列指令）
 
 - 功能：沿各轴关节坐标系进行相对运动指令，末端运动方式为关节运动。
 
@@ -2583,7 +3027,7 @@ English version of the README -> please [click here](./README-EN.md)
 - 说明：**控制器3.5.2版本及以上版本支持此命令；**
 
 
-## 3.81 Circle3（队列指令）
+## 3.2.18 Circle3（队列指令）
 
 - 功能：整圆运动，仅对笛卡尔点位生效。
 
@@ -2614,7 +3058,7 @@ English version of the README -> please [click here](./README-EN.md)
   | 返回 | 0,{},circle3({322.3267,-379.0799,545.6118,-171.5755,-20.8092,62.254},{-153.785,-473.2296,545.6118,-171.5755,-20.8092,3.8774},1); |
   | 说明 | 队列指令--整圆运动，进行整圆运动一圈。                       |
 
-## 3.82 Wait（队列指令）
+## 3.2.19 Wait（队列指令）
 
 - 功能：运动指令等待。
 
@@ -2640,7 +3084,38 @@ English version of the README -> please [click here](./README-EN.md)
   | ------------------------------------------- | -------------------------------------------------- | ---------------------------------------- |
   | MovJ(-500,100,200,150,0,90)<br />Wait(1000) | MovJ(-500,100,200,150,0,90);<br />0,{},Wait(1000); | 队列指令--机械臂MovJ到位后，延时1000毫秒 |
 
-  
+## 3.2.20 ServoJS（队列指令）
+
+- 功能：基于关节空间的动态跟随运动。
+
+- 格式：ServoJS(J1,J2,J3,J4,J5,J6)
+
+- 参数数量：6
+
+- 支持端口：30003
+
+- 参数详解：
+
+  | 参数名 | 类型   | 含义                      | 是否必填 |
+  | ------ | ------ | ------------------------- | -------- |
+  | J1     | double | 目标点J1 轴位置，单位：度 | 是       |
+  | J2     | double | 目标点J2 轴位置，单位：度 | 是       |
+  | J3     | double | 目标点J3 轴位置，单位：度 | 是       |
+  | J4     | double | 目标点J4 轴位置，单位：度 | 是       |
+  | J5     | double | 目标点J5 轴位置，单位：度 | 是       |
+  | J6     | double | 目标点J6 轴位置，单位：度 | 是       |
+
+- 返回：
+
+  ErrorID,{},ServoJS(J1,J2,J3,J4,J5,J6);
+
+- 示例：
+
+  | 示例                      | 返回                           | 说明                                 |
+  | ------------------------- | ------------------------------ | ------------------------------------ |
+  | servojs(60,0,20,-5,-5,-5) | 0,{},servojs(60,0,20,-5,-5,-5) | 队列指令--基于关节空间的动态跟随运动 |
+
+说明：**控制器3.5.7版本及以上版本支持此命令；该指令受SpeedFactor全局速度影响**
 
 # 4.反馈端口
 
